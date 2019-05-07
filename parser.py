@@ -6,6 +6,14 @@ output_filename = 'efo-graph.json'
 def parse(filename):
     diseases = {}
 
+    root_node = {
+        'id': 'EFO_ROOT',
+        'name': 'root',
+        'description': None,
+        'parentIds': []
+    }
+    diseases[root_node['id']] = root_node
+
     with open(filename, 'r') as f_input:        
         for line in f_input:
             blob = json.loads(line)
@@ -14,6 +22,9 @@ def parse(filename):
             description = blob['definition'] if blob['definition'] != '' else None
             parent_ids = {}
             for path in blob['path']:
+                top_ancestor = path[0]['uri'].split('/')[-1] == efo_id
+                conditional_root_parent_id = [root_node['id']] if top_ancestor else []
+
                 if len(path) > 1:
                     parent_id = path[-2]['uri'].split('/')[-1]
                     parent_ids[parent_id] = True
@@ -21,7 +32,7 @@ def parse(filename):
                 'id': efo_id,
                 'name': name,
                 'description': description,
-                'parentIds': list(parent_ids.keys())
+                'parentIds': list(parent_ids.keys()) + conditional_root_parent_id
             }
 
     with open(output_filename, 'w') as f_output:
