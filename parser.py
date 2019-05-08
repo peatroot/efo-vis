@@ -9,7 +9,7 @@ def parse(filename):
     root_node = {
         'id': 'EFO_ROOT',
         'name': 'root',
-        'description': None,
+        # 'description': None,
         'parentIds': []
     }
     diseases[root_node['id']] = root_node
@@ -19,7 +19,7 @@ def parse(filename):
             blob = json.loads(line)
             efo_id = blob['code'].split('/')[-1]
             name = blob['label']
-            description = blob['definition'] if blob['definition'] != '' else None
+            # description = blob['definition'] if blob['definition'] != '' else None
             parent_ids = {}
             for path in blob['path']:
                 top_ancestor = path[0]['uri'].split('/')[-1] == efo_id
@@ -31,7 +31,7 @@ def parse(filename):
             diseases[efo_id] = {
                 'id': efo_id,
                 'name': name,
-                'description': description,
+                # 'description': description,
                 'parentIds': list(parent_ids.keys()) + conditional_root_parent_id
             }
 
