@@ -2,6 +2,7 @@ import sys
 import json
 
 output_filename = 'efo-graph.json'
+output_minified_filename = 'efo-graph-minified.json'
 
 def parse(filename):
     diseases = {}
@@ -37,7 +38,23 @@ def parse(filename):
 
     with open(output_filename, 'w') as f_output:
         diseases_list = list(diseases.values())
-        json.dump(diseases_list, f_output, indent=4, sort_keys=True)
+        json.dump(diseases_list, f_output, separators=(',', ':'), sort_keys=True)
+
+    # minify (requires some processing, but slight improvement)
+    efo_id_to_int_id = { efo_id: i for i, efo_id in enumerate(diseases.keys()) }
+    mapping = [[] for i in range(len(diseases.keys()))]
+    parents = [[] for i in range(len(diseases.keys()))]
+
+    for disease in diseases.values():
+        int_id = efo_id_to_int_id[disease['id']]
+        mapping[int_id] = ([disease['id'], disease['name']])
+        parents[int_id] = ([efo_id_to_int_id[efo_id] for efo_id in disease['parentIds']])
+
+    with open(output_minified_filename, 'w') as f_output:
+        json.dump({
+            'mapping': mapping,
+            'parents': parents
+        }, f_output, separators=(',', ':'), sort_keys=True)
 
 if __name__ == '__main__':
     filename = sys.argv[1]
